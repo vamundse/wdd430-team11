@@ -1,3 +1,8 @@
+## Team members
+Paula Jessica Ferreira Lucas Da Silva
+Kishie Bhenyu
+Vegard Amundsen
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
