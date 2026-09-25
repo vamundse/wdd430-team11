@@ -15,17 +15,14 @@ export default function LoginPage() {
         {/* Logo */}
         <div className="mb-8 text-center">
           <Link href="/" className="inline-flex items-center gap-2">
-            <Link href="/" className="inline-block">
-              <Image
-                src="/logo.png"
-                alt="StudyHub"
-                width={1206}
-                height={926}
-                className="mx-auto h-28 w-auto"
-                priority
-              />
-            </Link>
-            
+            <Image
+              src="/logo.png"
+              alt="StudyHub"
+              width={1206}
+              height={926}
+              className="mx-auto h-28 w-auto"
+              priority
+            />
           </Link>
           <p className="mt-3 text-sm text-slate-600">
             Welcome back! Log in to continue studying.

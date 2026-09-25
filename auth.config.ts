@@ -1,5 +1,6 @@
 // auth.config.ts  (raiz do projeto, ao lado do package.json)
 import type { NextAuthConfig } from 'next-auth';
+import { NextResponse } from 'next/server';
 
 export const authConfig = {
   pages: {
@@ -14,10 +15,23 @@ export const authConfig = {
       );
 
       if (isAuthPage) {
-        
-        if (isLoggedIn) return Response.redirect(new URL('/', nextUrl));
+        if (isLoggedIn) {
+          const callbackUrl = nextUrl.searchParams.get('callbackUrl');
+
+          if (callbackUrl?.startsWith('/') && !callbackUrl.startsWith('//')) {
+            try {
+              const redirectUrl = new URL(callbackUrl, nextUrl);
+
+              return NextResponse.redirect(redirectUrl);
+            } catch {
+              // Fall back to the home page when callbackUrl is malformed.
+            }
+          }
+
+          return NextResponse.redirect(new URL('/', nextUrl));
+        }
         return true;
-      }  
+      }
       return isLoggedIn;
     },
 

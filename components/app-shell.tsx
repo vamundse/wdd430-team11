@@ -7,9 +7,11 @@ const AUTH_ROUTES = ['/login', '/signup', '/forgot-password'];
 
 export default function AppShell({
   navigation,
+  header,
   children,
 }: {
   navigation: React.ReactNode;
+  header?: React.ReactNode;
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
@@ -21,7 +23,10 @@ export default function AppShell({
   return (
     <div className="flex w-full min-h-screen">
       <div className="flex-shrink-0 w-50 min-h-screen">{navigation}</div>
-      <div className="flex-1">{children}</div>
+      <div className="flex min-h-screen flex-1 flex-col">
+        {header}
+        {children}
+      </div>
     </div>
   );
 }

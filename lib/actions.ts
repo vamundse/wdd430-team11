@@ -8,14 +8,24 @@ import { signIn, signOut } from '@/auth';
 import { connectToDatabase } from '@/lib/mongodb';
 import { User } from '@/models/User';
 
+function sanitizeRedirectTarget(value: FormDataEntryValue | null) {
+  return typeof value === 'string' && value.startsWith('/') && !value.startsWith('//')
+    ? value
+    : '/';
+}
+
 /* ---------------------------------- LOGIN --------------------------------- */
 
 export async function authenticate(
   prevState: string | undefined,
   formData: FormData,
 ) {
+  const email = String(formData.get('email') ?? '');
+  const password = String(formData.get('password') ?? '');
+  const redirectTo = sanitizeRedirectTarget(formData.get('redirectTo'));
+
   try {
-    await signIn('credentials', formData);
+    await signIn('credentials', { email, password, redirectTo });
   } catch (error) {
     if (error instanceof AuthError) {
       switch (error.type) {
@@ -101,9 +111,13 @@ export async function register(
 
     const passwordHash = await bcrypt.hash(password, 10);
     await User.create({ name, email, passwordHash });
-  } catch (error: any) {
-   
-    if (error?.code === 11000) {
+  } catch (error: unknown) {
+    if (
+      typeof error === 'object' &&
+      error !== null &&
+      'code' in error &&
+      error.code === 11000
+    ) {
       return {
         errors: { email: 'An account with this email already exists.' },
         values,

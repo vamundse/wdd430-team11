@@ -1,8 +1,11 @@
-"use client";
-
 import { Bell, ChevronDown, GraduationCap } from "lucide-react";
+import { auth } from "@/auth";
 
-export default function Header() {
+export default async function Header() {
+  const session = await auth();
+  const displayName = session?.user?.name ?? session?.user?.email ?? "User";
+  const userInitial = displayName.charAt(0).toUpperCase();
+
   return (
     <header className="flex h-20 items-center justify-between border-b border-slate-200 bg-white px-8">
       <div className="flex items-center gap-3">
@@ -24,21 +27,19 @@ export default function Header() {
           />
         </button>
 
-        <button
-          type="button"
+        <div
           className="flex items-center gap-2 rounded-full p-1 transition hover:bg-slate-100"
-          aria-label="Open user menu"
         >
           <span className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 font-semibold text-blue-700">
-            J
+            {userInitial}
           </span>
 
           <span className="hidden text-sm font-medium text-slate-700 md:block">
-            John Doe
+            {displayName}
           </span>
 
           <ChevronDown className="hidden h-4 w-4 text-slate-500 md:block" />
-        </button>
+        </div>
       </div>
     </header>
   );
