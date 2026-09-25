@@ -7,8 +7,11 @@ import { authenticate } from '@/lib/actions';
 
 export default function LoginForm() {
   const searchParams = useSearchParams();
-  
-  const callbackUrl = searchParams.get('callbackUrl') || '/';
+  const callbackUrlParam = searchParams.get('callbackUrl');
+  const callbackUrl =
+    callbackUrlParam && callbackUrlParam.startsWith('/') && !callbackUrlParam.startsWith('//')
+      ? callbackUrlParam
+      : '/';
   const [errorMessage, formAction, isPending] = useActionState(authenticate, undefined);
   const [showPassword, setShowPassword] = useState(false);
 
