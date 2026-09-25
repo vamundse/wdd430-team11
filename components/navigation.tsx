@@ -16,6 +16,7 @@ export default function Header() {
                     priority
                 />
             </div>
+                
                 <nav className="flex">
                     <ul className="flex flex-col justify-between gap-4">
                         <li><Link href="/">Home</Link></li>
