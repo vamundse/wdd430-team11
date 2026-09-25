@@ -18,13 +18,11 @@ export const authConfig = {
         if (isLoggedIn) {
           const callbackUrl = nextUrl.searchParams.get('callbackUrl');
 
-          if (callbackUrl) {
+          if (callbackUrl?.startsWith('/') && !callbackUrl.startsWith('//')) {
             try {
               const redirectUrl = new URL(callbackUrl, nextUrl);
 
-              if (redirectUrl.origin === nextUrl.origin) {
-                return NextResponse.redirect(redirectUrl);
-              }
+              return NextResponse.redirect(redirectUrl);
             } catch {
               // Fall back to the home page when callbackUrl is malformed.
             }

@@ -27,10 +27,8 @@ export default async function Header() {
           />
         </button>
 
-        <button
-          type="button"
+        <div
           className="flex items-center gap-2 rounded-full p-1 transition hover:bg-slate-100"
-          aria-label="Open user menu"
         >
           <span className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 font-semibold text-blue-700">
             {userInitial}
@@ -41,7 +39,7 @@ export default async function Header() {
           </span>
 
           <ChevronDown className="hidden h-4 w-4 text-slate-500 md:block" />
-        </button>
+        </div>
       </div>
     </header>
   );
