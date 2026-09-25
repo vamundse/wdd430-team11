@@ -2,7 +2,7 @@ import Link from 'next/link';
 import LogoutButton from './logout-button';
 import Image from 'next/image';
 
-export default function Header() {
+export default function Navigation() {
     return (
         <header className="bg-slate-800 text-white py-4 shadow-md min-h-screen">
             <div className="container mx-auto px-4 flex flex-col gap-4">

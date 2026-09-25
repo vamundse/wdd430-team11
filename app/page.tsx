@@ -2,7 +2,7 @@
 
 export default async function Home() {
     const session = await auth();
-    const userName = session?.user?.name;
+    const userName = session?.user?.name ?? 'there';
 
     return (
         <div className="flex flex-col items-center justify-center flex-1 bg-gray-100">
