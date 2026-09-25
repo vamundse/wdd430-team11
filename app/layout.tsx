@@ -27,8 +27,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <AppShell navigation={<Navigation />}>
-          <Header />
+        <AppShell navigation={<Navigation />} header={<Header />}>
           {children}
         </AppShell>
       </body>

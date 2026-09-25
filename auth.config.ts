@@ -14,10 +14,25 @@ export const authConfig = {
       );
 
       if (isAuthPage) {
-        
-        if (isLoggedIn) return Response.redirect(new URL('/', nextUrl));
+        if (isLoggedIn) {
+          const callbackUrl = nextUrl.searchParams.get('callbackUrl');
+
+          if (callbackUrl) {
+            try {
+              const redirectUrl = new URL(callbackUrl, nextUrl);
+
+              if (redirectUrl.origin === nextUrl.origin) {
+                return Response.redirect(redirectUrl);
+              }
+            } catch {
+              // Fall back to the home page when callbackUrl is malformed.
+            }
+          }
+
+          return Response.redirect(new URL('/', nextUrl));
+        }
         return true;
-      }  
+      }
       return isLoggedIn;
     },
 
