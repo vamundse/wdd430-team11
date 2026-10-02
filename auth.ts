@@ -1,17 +1,16 @@
-// auth.ts  (raiz do projeto, ao lado do package.json)
-import NextAuth from 'next-auth';
-import Credentials from 'next-auth/providers/credentials';
-import bcrypt from 'bcryptjs';
-import { z } from 'zod';
-import { authConfig } from './auth.config';
-import { getUserByEmail } from '@/lib/users';
+import NextAuth from "next-auth";
+import Credentials from "next-auth/providers/credentials";
+import bcrypt from "bcryptjs";
+import { z } from "zod";
+import { authConfig } from "./auth.config";
+import { getUserByEmail } from "@/lib/users";
 
 export const { auth, signIn, signOut, handlers } = NextAuth({
   ...authConfig,
+
   providers: [
     Credentials({
       async authorize(credentials) {
-        // Confere se email e senha vieram no formato certo
         const parsed = z
           .object({
             email: z.string().email(),
@@ -23,12 +22,15 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
 
         const { email, password } = parsed.data;
 
-        // Busca o usuário no MongoDB
         const user = await getUserByEmail(email);
+
         if (!user || !user.passwordHash) return null;
 
-        // Compara a senha digitada com o hash salvo no banco
-        const passwordsMatch = await bcrypt.compare(password, user.passwordHash);
+        const passwordsMatch = await bcrypt.compare(
+          password,
+          user.passwordHash
+        );
+
         if (!passwordsMatch) return null;
 
         return {
@@ -39,4 +41,24 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
       },
     }),
   ],
+
+  callbacks: {
+    ...authConfig.callbacks,
+
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
+      }
+
+      return token;
+    },
+
+    async session({ session, token }) {
+      if (session.user && token.id) {
+        session.user.id = token.id as string;
+      }
+
+      return session;
+    },
+  },
 });
