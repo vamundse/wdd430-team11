@@ -1,36 +1,14 @@
-import Link from "next/link";
-import type { SubjectDetailsProps } from "./SubjectDetails";
+import SubjectCard from "./SubjectCard";
+import { getSubjects } from "../lib/actions";
 
-interface SubjectListProps {
-    subjects: SubjectDetailsProps[]
-}
+export default async function SubjectList() {
+    const subjects = await getSubjects();
 
-export default function SubjectList({ subjects}: SubjectListProps) {
     return (
-        <div className="space-y-4">
-            {subjects.map(({ name, code, progress }) => (
-                <Link href={`/subjects/${code}`} key={code}> 
-                <div className="p-4 mb-4 bg-white rounded-lg shadow hover:bg-blue-100 hover:cursor-pointer" key={code}>
-                    <h2 className="text-xl font-semibold">{name} ({code})</h2>
-                    {progress !== undefined && (
-                        <div>
-                            <div className="flex justify-between">
-                            <span>Progress: {progress}%</span>
-                            </div>
-                            <div>
-                                <div className="h-2 bg-gray-200 rounded-full">
-                                    <div
-                                        className="h-2 bg-blue-500 rounded-full"
-                                        style={{ width: `${progress}%` }}
-                                    ></div>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                </div>
-                </Link>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-2">
+            {subjects.map((subject) => (
+                <SubjectCard subject={subject} key={subject.code} />
             ))}
         </div>
-        
     );
 }
