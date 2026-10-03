@@ -1,7 +1,13 @@
 import SubjectList from "../../components/SubjectList";
 import Link from "next/link";
+import { getSubjects } from "../../lib/actions";
 
 export default async function Subjects() {
+    // Count the logged-in user's subjects instead of hardcoding the numbers
+    const subjects = await getSubjects();
+    const inProgressCount = subjects.filter((subject) => subject.status === "in_progress").length;
+    const completedCount = subjects.filter((subject) => subject.status === "completed").length;
+
     return (
         <main className="min-h-screen w-full bg-slate-50 p-4">
             
@@ -9,13 +15,13 @@ export default async function Subjects() {
             <div className="flex justify-between items-center mb-4">
                 <div className="space-x-4">
                     <Link href="/subjects">
-                        All (4)
+                        All ({subjects.length})
                     </Link>
                     <Link href="/subjects?status=in_progress">
-                        In Progress (3)
+                        In Progress ({inProgressCount})
                     </Link>
                     <Link href="/subjects?status=completed">
-                        Completed (1)
+                        Completed ({completedCount})
                     </Link>
                 </div>
                 <Link href="/subjects/create">

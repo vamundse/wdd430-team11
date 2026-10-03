@@ -1,5 +1,6 @@
-import { CircleCheck } from 'lucide-react';
+import { Circle, CircleCheck } from 'lucide-react';
 import type { TaskListItem } from '@/lib/tasks';
+import { toggleTaskCompleted } from '@/lib/task-actions';
 
 const PRIORITY_STYLES = {
   high: 'bg-red-50 text-red-700',
@@ -23,10 +24,31 @@ function formatDue(iso: string) {
 
 export default function TaskCard({ task }: { task: TaskListItem }) {
   const isDone = task.status === 'completed';
+  const toggleThisTask = toggleTaskCompleted.bind(null, task.id);
 
   return (
-    <li className="flex items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white px-5 py-4">
-      <div className="min-w-0">
+    <li className="flex items-center gap-4 rounded-xl border border-slate-200 bg-white px-5 py-4">
+      <form action={toggleThisTask}>
+        <button
+          type="submit"
+          aria-label={
+            isDone
+              ? `Mark "${task.title}" as not completed`
+              : `Mark "${task.title}" as completed`
+          }
+          className={`flex rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 ${
+            isDone ? 'text-emerald-600' : 'text-slate-400 hover:text-emerald-600'
+          }`}
+        >
+          {isDone ? (
+            <CircleCheck className="h-6 w-6" aria-hidden="true" />
+          ) : (
+            <Circle className="h-6 w-6" aria-hidden="true" />
+          )}
+        </button>
+      </form>
+
+      <div className="min-w-0 flex-1">
         <h2
           className={`font-semibold ${isDone ? 'text-slate-400 line-through' : 'text-slate-900'}`}
         >
@@ -43,12 +65,7 @@ export default function TaskCard({ task }: { task: TaskListItem }) {
         </p>
       </div>
 
-      {isDone ? (
-        <span className="shrink-0 text-emerald-600">
-          <CircleCheck className="h-5 w-5" aria-hidden="true" />
-          <span className="sr-only">Completed</span>
-        </span>
-      ) : (
+      {!isDone && (
         <span
           className={`shrink-0 rounded-full px-3 py-1 text-xs font-medium ${PRIORITY_STYLES[task.priority]}`}
         >

@@ -84,3 +84,28 @@ export async function createTask(
   revalidatePath('/tasks');
   return { success: true };
 }
+
+export async function toggleTaskCompleted(taskId: string): Promise<void> {
+  const userId = await requireUserId();
+
+  // Ignore anything that isn't a valid MongoDB id
+  if (!/^[a-f\d]{24}$/i.test(taskId)) return;
+
+  try {
+    await connectToDatabase();
+
+    // Only finds the task if it belongs to the logged-in user
+    const task = await Task.findOne({ _id: taskId, userId });
+    if (!task) return;
+
+    const isDone = task.status === 'completed';
+    task.status = isDone ? 'pending' : 'completed';
+    task.completedAt = isDone ? undefined : new Date();
+    await task.save();
+  } catch (error) {
+    console.error('toggleTaskCompleted failed:', error);
+    throw new Error('Failed to update the task. Please try again.');
+  }
+
+  revalidatePath('/tasks');
+}
