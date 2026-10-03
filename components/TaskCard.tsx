@@ -1,6 +1,8 @@
 import { Circle, CircleCheck } from 'lucide-react';
-import type { TaskListItem } from '@/lib/tasks';
+import type { SubjectOption, TaskListItem } from '@/lib/tasks';
 import { toggleTaskCompleted } from '@/lib/task-actions';
+import TaskModal from '@/components/TaskModal';
+import DeleteTaskButton from '@/components/DeleteTaskButton';
 
 const PRIORITY_STYLES = {
   high: 'bg-red-50 text-red-700',
@@ -22,7 +24,13 @@ function formatDue(iso: string) {
   return `${day}, ${time}`;
 }
 
-export default function TaskCard({ task }: { task: TaskListItem }) {
+export default function TaskCard({
+  task,
+  subjects,
+}: {
+  task: TaskListItem;
+  subjects: SubjectOption[]; // for the subject list in the edit form
+}) {
   const isDone = task.status === 'completed';
   const toggleThisTask = toggleTaskCompleted.bind(null, task.id);
 
@@ -73,6 +81,11 @@ export default function TaskCard({ task }: { task: TaskListItem }) {
           <span className="sr-only"> priority</span>
         </span>
       )}
+
+      <div className="flex shrink-0 items-center">
+        <TaskModal subjects={subjects} task={task} />
+        <DeleteTaskButton id={task.id} title={task.title} />
+      </div>
     </li>
   );
 }

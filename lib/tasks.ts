@@ -7,6 +7,7 @@ import { Subject } from '@/models/Subject';
 export type TaskListItem = {
   id: string;
   title: string;
+  subjectId: string; // used to pre-select the subject in the edit form
   subjectLabel: string;
   dueDate: string; // ISO string
   status: TaskStatus;
@@ -44,6 +45,7 @@ export async function getTasksForUser(userId: string): Promise<TaskListItem[]> {
   return tasks.map((task) => ({
     id: task._id.toString(),
     title: task.title,
+    subjectId: task.subjectId ? task.subjectId._id.toString() : '',
     subjectLabel: task.subjectId ? subjectLabel(task.subjectId) : 'No subject',
     dueDate: task.dueDate.toISOString(),
     status: task.status,

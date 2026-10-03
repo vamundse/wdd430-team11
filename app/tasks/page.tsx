@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import { requireUserId } from '@/lib/session';
 import { getSubjectOptions, getTasksForUser } from '@/lib/tasks';
 import TaskCard from '@/components/TaskCard';
-import NewTaskModal from '@/components/NewTaskModal';
+import TaskModal from '@/components/TaskModal';
 
 export const metadata: Metadata = {
   title: 'Tasks | StudyHub',
@@ -52,7 +52,7 @@ export default async function TasksPage({ searchParams }: PageProps<'/tasks'>) {
               You have {counts.pending} pending {counts.pending === 1 ? 'task' : 'tasks'}.
             </p>
           </div>
-          <NewTaskModal subjects={subjects} />
+          <TaskModal subjects={subjects} />
         </div>
 
         <nav aria-label="Filter tasks">
@@ -83,7 +83,7 @@ export default async function TasksPage({ searchParams }: PageProps<'/tasks'>) {
         ) : (
           <ul className="flex flex-col gap-3">
             {visibleTasks.map((task) => (
-              <TaskCard key={task.id} task={task} />
+              <TaskCard key={task.id} task={task} subjects={subjects} />
             ))}
           </ul>
         )}
