@@ -1,4 +1,4 @@
-import type { SubjectDetailsProps } from "../components/SubjectDetails";
+import type { SubjectDetailsProps } from "@/components/SubjectDetails";
 
 export const testSubjects: SubjectDetailsProps[] = [
 	{

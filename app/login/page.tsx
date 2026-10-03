@@ -1,11 +1,11 @@
 // app/login/page.tsx
-import { Suspense } from 'react';
-import Link from 'next/link';
-import LoginForm from '@/components/login-form';
-import Image from 'next/image';
+import { Suspense } from "react";
+import Link from "next/link";
+import LoginForm from "@/components/login-form";
+import Image from "next/image";
 
 export const metadata = {
-  title: 'Login | StudyHub',
+  title: "Login | StudyHub",
 };
 
 export default function LoginPage() {
@@ -24,6 +24,7 @@ export default function LoginPage() {
               priority
             />
           </Link>
+
           <p className="mt-3 text-sm text-slate-600">
             Welcome back! Log in to continue studying.
           </p>
@@ -37,8 +38,11 @@ export default function LoginPage() {
         </div>
 
         <p className="mt-6 text-center text-sm text-slate-600">
-          Don&apos;t have an account?{' '}
-          <Link href="/signup" className="font-medium text-indigo-600 hover:text-indigo-500">
+          Don&apos;t have an account?{" "}
+          <Link
+            href="/signup"
+            className="font-medium text-indigo-600 hover:text-indigo-500"
+          >
             Sign up
           </Link>
         </p>
