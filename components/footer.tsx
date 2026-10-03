@@ -30,7 +30,13 @@ export default function Footer() {
           >
             Tasks
           </Link>
-
+          
+          <Link
+            href="/events"
+            className="transition hover:text-slate-900"
+          >
+            Events
+          </Link>
           <Link
             href="/calendar"
             className="transition hover:text-slate-900"
