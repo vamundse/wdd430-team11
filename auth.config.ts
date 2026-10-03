@@ -35,6 +35,16 @@ export const authConfig = {
       return isLoggedIn;
     },
 
+    // Expose the MongoDB user id (saved in token.sub at sign in) to server code
+    session({ session, token }) {
+      if (session.user && token.sub) {
+        session.user.id = token.sub;
+      }
+      return session;
+    },
+
   },
   providers: [], // os providers ficam em auth.ts
 } satisfies NextAuthConfig;
+
+
