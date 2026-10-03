@@ -66,3 +66,29 @@ export async function getSubjectOptions(userId: string): Promise<SubjectOption[]
     label: subjectLabel(subject),
   }));
 }
+
+// Progress per subject: completed tasks ÷ total tasks, as a number from 0 to 100.
+// Returns an object like { "<subjectId>": 50, "<otherSubjectId>": 100 }
+export async function getProgressBySubject(userId: string): Promise<Record<string, number>> {
+  await connectToDatabase();
+
+  const tasks = await Task.find({ userId })
+    .select('subjectId status')
+    .lean<{ subjectId: Types.ObjectId; status: TaskStatus }[]>();
+
+  // 1. Count total and completed tasks for each subject
+  const counts: Record<string, { done: number; total: number }> = {};
+  for (const task of tasks) {
+    const subjectId = task.subjectId.toString();
+    const entry = (counts[subjectId] ??= { done: 0, total: 0 });
+    entry.total += 1;
+    if (task.status === 'completed') entry.done += 1;
+  }
+
+  // 2. Turn the counts into percentages
+  const progress: Record<string, number> = {};
+  for (const [subjectId, { done, total }] of Object.entries(counts)) {
+    progress[subjectId] = Math.round((done / total) * 100);
+  }
+  return progress;
+}
