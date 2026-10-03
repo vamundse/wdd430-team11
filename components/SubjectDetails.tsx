@@ -1,4 +1,5 @@
 import { getSubjectById } from "../lib/actions";
+import { notFound } from "next/navigation";
 
 export interface SubjectDetailsProps {
     id: string;
@@ -14,6 +15,13 @@ export interface SubjectDetailsProps {
 export default async function SubjectDetails({ id }: { id: string }) {
     const subject = await getSubjectById(id);
     console.log(subject);
+    
+    // getSubjectById returns null when the subject doesn't exist
+    // or belongs to another user
+    
+    if (!subject) {
+        notFound();
+    }
 
     return (
         <div className="text-gray-800 bg-white p-4 rounded-lg shadow w-full max-w-4xl mx-auto">
