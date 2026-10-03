@@ -1,6 +1,6 @@
-import SubjectDetails from "../../../components/SubjectDetails";
+import SubjectDetails from "@/components/SubjectDetails";
 import { testSubjects } from "../../../lib/testDb";
-
+import SubjectList from "@/components/SubjectList";
 
 export default async function SubjectDetailsPage( { params }: { params: Promise<{id: string}>}) {
     const { id } = await params;

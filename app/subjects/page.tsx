@@ -1,4 +1,4 @@
-import SubjectList from "../../components/SubjectList";
+import SubjectList from "@/components/SubjectList";
 import { testSubjects } from "../../lib/testDb";
 
 export default function Subjects() {
