@@ -1,12 +1,16 @@
 // lib/actions.ts
 'use server';
 
+import { redirect } from 'next/navigation';
+import { revalidatePath } from 'next/cache';
 import bcrypt from 'bcryptjs';
-import { z } from 'zod';
+import { nativeEnum, z } from 'zod';
 import { AuthError } from 'next-auth';
 import { signIn, signOut } from '@/auth';
 import { connectToDatabase } from '@/lib/mongodb';
 import { User } from '@/models/User';
+import { Subject } from '@/models/Subject';
+import { Types } from 'mongoose';
 
 function sanitizeRedirectTarget(value: FormDataEntryValue | null) {
   return typeof value === 'string' && value.startsWith('/') && !value.startsWith('//')
@@ -129,4 +133,105 @@ export async function register(
 
 
   await signIn('credentials', { email, password, redirectTo: '/' });
+}
+
+/* --------------------------------- Subject Actions --------------------------------- */
+
+export async function getSubjects() {
+  try {
+    await connectToDatabase();
+    const subjects = await Subject.find();
+    return subjects;
+  } catch (error: unknown) {
+    console.error('Error fetching subjects:', error);
+    return [];
+  }
+}
+
+export async function getSubjectById(id: string) {
+  try {
+    await connectToDatabase();
+    const subject = await Subject.findById(id);
+    return subject;
+  } catch (error: unknown) {
+    console.error('Error fetching subject by ID:', error);
+    return null;
+  }
+}
+
+export async function searchSubjects(query: string) {
+  try {
+    await connectToDatabase();
+    const subjects = await Subject.find({ name: { $regex: query, $options: 'i' } });
+    return subjects;
+  } catch (error: unknown) {
+    console.error('Error searching subjects:', error);
+    return [];
+  }
+}
+
+export async function filterSubjectsByStatus(query: string) {
+  try {
+    await connectToDatabase();
+    const subjects = await Subject.find({ status: query });
+    return subjects;
+  } catch (error: unknown) {
+    console.error('Error filtering subjects:', error);
+    return [];
+  }
+}
+
+const subjectStatus = z.nativeEnum({
+  IN_PROGRESS: 'in_progress',
+  COMPLETED: 'completed',
+  DROPPED: 'dropped',
+});
+
+const createSubjectSchema = z.object({
+  userId: z.instanceof(Types.ObjectId),
+  name: z.string(), // ex: "Database Systems"
+  code: z.string(), // ex: "CS 340"
+  instructor: z.string().optional(),
+  color: z.string(), // hex, ex: "#2f5fe0"
+  status: subjectStatus.optional(),
+  progress: z.number().min(0).max(100).optional(), // 0-100
+  startDate: z.date().optional(),
+  endDate: z.date().optional(),
+  notes: z.string().optional(),
+  createdAt: z.date().optional(),
+  updatedAt: z.date().optional(),
+});
+
+export async function createSubject(formData: FormData) {
+  try {
+    const rawData = {
+      name: formData.get('name'),
+      code: formData.get('code'),
+      instructor: formData.get('instructor') || undefined,
+      color: formData.get('color'),
+      startDate: formData.get('startDate') || undefined,
+    };
+
+    console.log('Raw data:', rawData);
+
+    const parsedData = createSubjectSchema.safeParse(rawData);
+    console.log('Parsed data:', parsedData);
+
+    await connectToDatabase();
+    if (!parsedData.success) {
+      console.error('Validation failed:', parsedData.error);
+      return null;
+    }
+
+    const subject = await Subject.create(parsedData.data);
+    console.log('Created subject:', subject);
+    return subject;
+
+  } catch (error: unknown) {
+    console.error('Error creating subject:', error);
+    return null;
+  }
+
+  revalidatePath('/subjects');  
+  redirect('/subjects');
 }
