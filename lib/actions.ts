@@ -1,12 +1,17 @@
 // lib/actions.ts
 'use server';
 
+import { redirect } from 'next/navigation';
+import { revalidatePath } from 'next/cache';
 import bcrypt from 'bcryptjs';
-import { z } from 'zod';
+import { z, nativeEnum } from 'zod';
 import { AuthError } from 'next-auth';
 import { signIn, signOut } from '@/auth';
 import { connectToDatabase } from '@/lib/mongodb';
 import { User } from '@/models/User';
+import { Subject } from '@/models/Subject';
+import { requireUserId } from '@/lib/session';
+
 
 function sanitizeRedirectTarget(value: FormDataEntryValue | null) {
   return typeof value === 'string' && value.startsWith('/') && !value.startsWith('//')
@@ -129,4 +134,125 @@ export async function register(
 
 
   await signIn('credentials', { email, password, redirectTo: '/' });
+}
+
+/* --------------------------------- Subject Actions --------------------------------- */
+// Every query is limited to the logged-in user's own subjects.
+// All subject queries are limited to the logged-in user, so each student
+// only sees their own subjects.
+// requireUserId() must stay OUTSIDE try/catch: it redirects to /login by
+// throwing, and a catch block would swallow that redirect.
+
+export async function getSubjects() {
+  const userId = await requireUserId();
+
+  try {
+    await connectToDatabase();
+    return await Subject.find({ userId });   
+  } catch (error: unknown) {
+    console.error('Error fetching subjects:', error);
+    return [];
+  }
+}
+
+export async function getSubjectById(id: string) {
+  const userId = await requireUserId();
+
+  try {
+    await connectToDatabase();
+    return await Subject.findOne({ _id: id, userId });    
+  } catch (error: unknown) {
+    console.error('Error fetching subject by ID:', error);
+    return null;
+  }
+}
+
+export async function searchSubjects(query: string) {
+  const userId = await requireUserId();
+  try {
+    await connectToDatabase();
+    const subjects = await Subject.find({ userId,  name: { $regex: query, $options: 'i' } });
+    return subjects;
+  } catch (error: unknown) {
+    console.error('Error searching subjects:', error);
+    return [];
+  }
+}
+
+export async function filterSubjectsByStatus(query: string) {
+  const userId = await requireUserId();
+
+  try {
+    await connectToDatabase();
+    const subjects = await Subject.find({ userId, status: query });
+    return subjects;
+  } catch (error: unknown) {
+    console.error('Error filtering subjects:', error);
+    return [];
+  }
+}
+
+const subjectStatus = z.nativeEnum({
+  IN_PROGRESS: 'in_progress',
+  COMPLETED: 'completed',
+  DROPPED: 'dropped',
+});
+
+// Describes only what the form sends. The owner (userId) is NOT here on
+// purpose: it comes from the session in createSubject, never from the form.
+
+const createSubjectSchema = z.object({
+  //userId: z.instanceof(Types.ObjectId), this will be set server-side, not from the form
+  name: z.string(), // ex: "Database Systems"
+  code: z.string(), // ex: "CS 340"
+  instructor: z.string().optional(),
+  color: z.string(), // hex, ex: "#2f5fe0"
+  status: subjectStatus.optional(),
+  progress: z.number().min(0).max(100).optional(), // 0-100
+  startDate: z.coerce.date().optional(),
+  endDate: z.coerce.date().optional(),
+  notes: z.string().optional(),
+  createdAt: z.coerce.date().optional(),
+  updatedAt: z.coerce.date().optional(),
+});
+
+export async function createSubject(formData: FormData) {
+  // The owner comes from the session, so nobody can create subjects for another use
+  const userId = await requireUserId(); 
+  
+  try {
+    const rawData = {
+      name: formData.get('name'),
+      code: formData.get('code'),
+      instructor: formData.get('instructor') || undefined,
+      color: formData.get('color'),
+      startDate: formData.get('startDate') || undefined,
+    };
+
+    console.log('Raw data:', rawData);
+
+    const parsedData = createSubjectSchema.safeParse(rawData);
+    console.log('Parsed data:', parsedData);
+
+    await connectToDatabase();
+    if (!parsedData.success) {
+      console.error('Validation failed:', parsedData.error);
+      return;//It failed: exit the function here.
+    }
+
+    const subject = await Subject.create({
+      // No "return subject" here: returning would skip the revalidate + redirect below
+      ...parsedData.data,
+      userId,
+    });
+    console.log('Created subject:', subject);
+    
+
+  } catch (error: unknown) {
+    console.error('Error creating subject:', error);
+    return;
+  }
+  // Outside try/catch on purpose: redirect() works by throwing
+  revalidatePath('/subjects');  
+  redirect('/subjects');
 }
