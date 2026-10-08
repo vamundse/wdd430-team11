@@ -1,4 +1,4 @@
-import SubjectList from "../../components/SubjectList";
+import SubjectList from "@/components/SubjectList";
 import Link from "next/link";
 import { getSubjects } from "../../lib/actions";
 

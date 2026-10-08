@@ -23,6 +23,7 @@ export default function Navigation() {
                         <li><Link href="/calendar">Calendar</Link></li>
                         <li><Link href="/tasks">Tasks</Link></li>
                         <li><Link href="/subjects">Subjects</Link></li>
+                        <li><Link href="/events">Events</Link></li>
                         <li><LogoutButton /></li>
                     </ul>
                 </nav>
