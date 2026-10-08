@@ -1,7 +1,7 @@
 // app/signup/page.tsx
 import Link from 'next/link';
 import Image from 'next/image';
-import SignupForm from '@/components/signup-form';
+import SignupForm from "@/components/signup-form";
 
 export const metadata = {
   title: 'Sign up | StudyHub',

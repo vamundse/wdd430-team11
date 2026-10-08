@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Navigation from "../components/Navigation";
-import AppShell from "../components/app-shell";
-import Header from "../components/header";
-import Footer from "../components/footer";
+import Navigation from "@/components/Navigation";
+import AppShell from "@/components/app-shell";
+import Header from "@/components/header";
+import Footer from "@/components/footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,17 +27,15 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
-<body className="min-h-full flex flex-col">
-  <AppShell navigation={<Navigation />} header={<Header />}>
-    <main className="flex-1">
-      {children}
-    </main>
+    <body className="min-h-full flex flex-col">
+      <AppShell navigation={<Navigation />} header={<Header />}>
+        <main className="flex flex-col flex-1">
+          {children}
+        </main>
 
-    <Footer />
-  </AppShell>
-</body>
-      </body>
+        <Footer />
+      </AppShell>
+    </body>
     </html>
   );
 }
