@@ -2,6 +2,7 @@ import type { Types } from 'mongoose';
 import { connectToDatabase } from '@/lib/mongodb';
 import { Task, type TaskPriority, type TaskStatus } from '@/models/Task';
 import { Subject } from '@/models/Subject';
+import type { SubjectStatus } from '@/models/Subject';
 
 // Plain objects that can be passed from Server to Client Components.
 export type TaskListItem = {
@@ -91,4 +92,39 @@ export async function getProgressBySubject(userId: string): Promise<Record<strin
     progress[subjectId] = Math.round((done / total) * 100);
   }
   return progress;
+}
+
+export function getSubjectStatus(currentStatus: SubjectStatus, tasks: TaskListItem[], ): SubjectStatus {
+  if (currentStatus === 'dropped') return 'dropped';
+  const allCompleted =
+    tasks.length > 0 &&
+    tasks.every((task) => task.status === 'completed');
+    return allCompleted ? 'completed' : 'in_progress';
+}
+
+export async function syncSubjectStatus(
+  subjectId: string,
+  userId: string,
+): Promise<void> {
+  await connectToDatabase();
+
+  const [total, incomplete] = await Promise.all([
+    Task.countDocuments({ userId, subjectId}),
+    Task.countDocuments({
+      userId,
+      subjectId,
+      status: { $ne: 'completed' }
+    })
+  ]);
+
+  const status: SubjectStatus =
+  total === 0 ? 'in_progress' : incomplete === 0 ? 'completed' : 'in_progress';
+
+  await Subject.updateOne({
+    _id: subjectId,
+    userId,
+    status: { $ne: 'dropped' }
+  }, {
+    $set: { status }
+  });
 }

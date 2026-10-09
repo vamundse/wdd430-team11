@@ -11,6 +11,8 @@ import { connectToDatabase } from '@/lib/mongodb';
 import { User } from '@/models/User';
 import { Subject } from '@/models/Subject';
 import { requireUserId } from '@/lib/session';
+import { isValidObjectId, startSession } from 'mongoose';
+import { Task } from '@/models/Task';
 
 
 function sanitizeRedirectTarget(value: FormDataEntryValue | null) {
@@ -143,12 +145,12 @@ export async function register(
 // requireUserId() must stay OUTSIDE try/catch: it redirects to /login by
 // throwing, and a catch block would swallow that redirect.
 
-export async function getSubjects() {
+export async function getSubjects( param: string | null ) {
   const userId = await requireUserId();
 
   try {
     await connectToDatabase();
-    return await Subject.find({ userId });   
+    return await Subject.find({ userId, status: param ?? { $exists: true } });
   } catch (error: unknown) {
     console.error('Error fetching subjects:', error);
     return [];
@@ -201,10 +203,14 @@ const subjectStatus = z.nativeEnum({
 // Describes only what the form sends. The owner (userId) is NOT here on
 // purpose: it comes from the session in createSubject, never from the form.
 
-const createSubjectSchema = z.object({
+const subjectSchema = z.object({
   //userId: z.instanceof(Types.ObjectId), this will be set server-side, not from the form
-  name: z.string(), // ex: "Database Systems"
-  code: z.string(), // ex: "CS 340"
+  name: z
+    .string({ error: "Subject name is required" })
+    .min(3, { error: "Subject name cannot be empty" }), // ex: "Database Systems"
+  code: z
+    .string({ error: "Subject code is required" })
+    .min(3, { error: "Subject code cannot be empty" }), // ex: "CS 340"
   instructor: z.string().optional(),
   color: z.string(), // hex, ex: "#2f5fe0"
   status: subjectStatus.optional(),
@@ -227,11 +233,12 @@ export async function createSubject(formData: FormData) {
       instructor: formData.get('instructor') || undefined,
       color: formData.get('color'),
       startDate: formData.get('startDate') || undefined,
+      endDate: formData.get('endDate') || undefined,
     };
 
     console.log('Raw data:', rawData);
 
-    const parsedData = createSubjectSchema.safeParse(rawData);
+    const parsedData = subjectSchema.safeParse(rawData);
     console.log('Parsed data:', parsedData);
 
     await connectToDatabase();
@@ -252,7 +259,82 @@ export async function createSubject(formData: FormData) {
     console.error('Error creating subject:', error);
     return;
   }
-  // Outside try/catch on purpose: redirect() works by throwing
-  revalidatePath('/subjects');  
-  redirect('/subjects');
+  revalidatePath('/subjects');
+}
+
+export async function updateSubject(formData: FormData) {
+  const id = formData.get('id') as string;
+  
+  try {
+    const rawData = {
+      name: formData.get('name'),
+      code: formData.get('code'),
+      instructor: formData.get('instructor') || undefined,
+      color: formData.get('color'),
+      startDate: formData.get('startDate') || undefined,
+      endDate: formData.get('endDate') || undefined,
+    };
+
+    console.log('Raw data:', rawData);
+
+    const parsedData = subjectSchema.safeParse(rawData);
+    console.log('Parsed data:', parsedData);
+
+    await connectToDatabase();
+    if (!parsedData.success) {
+      console.error('Validation failed:', parsedData.error);
+      return;//It failed: exit the function here.
+    }
+
+    const subject = await Subject.updateOne(
+      { _id: id },
+      { $set: parsedData.data }
+    );
+
+    console.log('Updated subject:', subject);
+
+  } catch (error: unknown) {
+    console.error('Error updating subject:', error);
+    return;
+  }
+
+  revalidatePath('/subjects');
+  revalidatePath('/subjects/[id]', 'page');  
+}
+
+export async function deleteSubject(subjectId: string): Promise<void> {
+  const userId = await requireUserId();
+  if (!isValidObjectId(subjectId)) return;
+
+  try {
+    await connectToDatabase();
+    const session = await startSession();
+
+    try {
+      await session.withTransaction(async () => {
+        const result =await Subject.deleteOne(
+          { _id: subjectId, userId },
+          { session },
+        );
+
+        if (result.deletedCount === 0) {
+          throw new Error('Failed to delete the subject. It may not exist or you may not have permission.');
+        }
+
+        await Task.deleteMany(
+          { subjectId, userId },
+          { session },
+        );
+      });
+    } finally {
+      await session.endSession();
+    }
+  } catch (error) {
+    console.error('deleteSubject failed:', error);
+    throw new Error('Failed to delete the subject. Please try again.');
+  }
+
+  revalidatePath('/subjects');
+  revalidatePath('/tasks');
+  revalidatePath('/subjects/[id]', 'page');
 }
