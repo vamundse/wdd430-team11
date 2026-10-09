@@ -1,8 +1,9 @@
-import { Circle, CircleCheck } from 'lucide-react';
+import { AlertCircle, Circle, CircleCheck } from 'lucide-react';
 import type { SubjectOption, TaskListItem } from '@/lib/tasks';
 import { toggleTaskCompleted } from '@/lib/task-actions';
 import TaskModal from '@/components/TaskModal';
 import DeleteTaskButton from '@/components/DeleteTaskButton';
+
 
 const PRIORITY_STYLES = {
   high: 'bg-red-50 text-red-700',
@@ -35,7 +36,13 @@ export default function TaskCard({
   const toggleThisTask = toggleTaskCompleted.bind(null, task.id);
 
   return (
-    <li className="flex items-center gap-4 rounded-xl border border-slate-200 bg-white px-5 py-4">
+    <li
+      className={`flex items-center gap-4 rounded-xl border px-5 py-4 ${
+        task.isOverdue
+          ? 'border-red-200 border-l-4 border-l-red-500 bg-red-50/50'
+          : 'border-slate-200 bg-white'
+      }`}
+    >
       <form action={toggleThisTask}>
         <button
           type="submit"
@@ -73,14 +80,21 @@ export default function TaskCard({
         </p>
       </div>
 
-      {!isDone && (
-        <span
-          className={`shrink-0 rounded-full px-3 py-1 text-xs font-medium ${PRIORITY_STYLES[task.priority]}`}
-        >
-          {PRIORITY_LABELS[task.priority]}
-          <span className="sr-only"> priority</span>
-        </span>
-      )}
+          {!isDone && (
+            <>
+              {' - '}
+              {task.isOverdue ? (
+                <span className="inline-flex items-center gap-1 font-medium text-red-700">
+                  <AlertCircle className="h-4 w-4" aria-hidden="true" />
+                  Overdue since <time dateTime={task.dueDate}>{formatDue(task.dueDate)}</time>
+                </span>
+              ) : (
+                <>
+                  Due <time dateTime={task.dueDate}>{formatDue(task.dueDate)}</time>
+                </>
+              )}
+            </>
+          )}
 
       <div className="flex shrink-0 items-center">
         <TaskModal subjects={subjects} task={task} />

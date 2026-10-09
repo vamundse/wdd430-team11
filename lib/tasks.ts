@@ -12,6 +12,7 @@ export type TaskListItem = {
   dueDate: string; // ISO string
   status: TaskStatus;
   priority: TaskPriority;
+  isOverdue: boolean;
 };
 
 export type SubjectOption = {
@@ -36,6 +37,7 @@ function subjectLabel(subject: SubjectDoc) {
 
 export async function getTasksForUser(userId: string): Promise<TaskListItem[]> {
   await connectToDatabase();
+  const now = new Date();
 
   const tasks = await Task.find({ userId })
     .populate('subjectId', 'name code')
@@ -50,6 +52,7 @@ export async function getTasksForUser(userId: string): Promise<TaskListItem[]> {
     dueDate: task.dueDate.toISOString(),
     status: task.status,
     priority: task.priority,
+    isOverdue: task.status !== 'completed' && task.dueDate < now,
   }));
 }
 
