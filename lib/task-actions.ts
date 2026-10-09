@@ -6,6 +6,7 @@ import { connectToDatabase } from '@/lib/mongodb';
 import { requireUserId } from '@/lib/session';
 import { Task } from '@/models/Task';
 import { Subject } from '@/models/Subject';
+import { syncSubjectStatus } from '@/lib/tasks';
 
 /* ------------------------------- Validation ------------------------------- */
 
@@ -221,10 +222,13 @@ export async function toggleTaskCompleted(taskId: string): Promise<void> {
     task.status = isDone ? 'pending' : 'completed';
     task.completedAt = isDone ? undefined : new Date();
     await task.save();
+    await syncSubjectStatus(task.subjectId.toString(), userId);
   } catch (error) {
     console.error('toggleTaskCompleted failed:', error);
     throw new Error('Failed to update the task. Please try again.');
   }
 
   revalidatePath('/tasks');
+  revalidatePath('/subjects');
+  revalidatePath('/subjects/[id]', 'page');
 }

@@ -54,7 +54,7 @@ function TaskForm({
 }: {
   subjects: SubjectOption[];
   action: FormAction;
-  initialValues?: TaskFormValues;
+  initialValues?: Partial<TaskFormValues>;
   isEditing: boolean;
   onSuccess: () => void;
   onCancel: () => void;
@@ -222,9 +222,11 @@ function TaskForm({
 export default function TaskModal({
   subjects,
   task,
+  defaultSubjectId,
 }: {
   subjects: SubjectOption[];
   task?: TaskListItem;
+  defaultSubjectId?: string;
 }) {
   const isEditing = task !== undefined;
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -313,7 +315,7 @@ export default function TaskModal({
               <TaskForm
                 subjects={subjects}
                 action={action}
-                initialValues={isEditing ? valuesFromTask(task) : undefined}
+                initialValues={isEditing ? valuesFromTask(task) : { subjectId: defaultSubjectId ?? '' }}
                 isEditing={isEditing}
                 onSuccess={closeModal}
                 onCancel={closeModal}
