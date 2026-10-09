@@ -5,7 +5,7 @@ import { BookOpen, CalendarDays, House, ListTodo } from 'lucide-react';
 
 const navigationLinks = [
     { href: '/', label: 'Home', icon: House },
-    { href: '/event', label: 'Events', icon: CalendarDays },
+    { href: '/events', label: 'Events', icon: CalendarDays },
     { href: '/tasks', label: 'Tasks', icon: ListTodo },
     { href: '/subjects', label: 'Subjects', icon: BookOpen },
 ];
