@@ -204,102 +204,150 @@ const subjectStatus = z.nativeEnum({
 // purpose: it comes from the session in createSubject, never from the form.
 
 const subjectSchema = z.object({
-  //userId: z.instanceof(Types.ObjectId), this will be set server-side, not from the form
   name: z
     .string({ error: "Subject name is required" })
-    .min(3, { error: "Subject name cannot be empty" }), // ex: "Database Systems"
+    .trim()
+    .min(3, { error: "Subject name must be at least 3 characters long" }),
   code: z
     .string({ error: "Subject code is required" })
-    .min(3, { error: "Subject code cannot be empty" }), // ex: "CS 340"
-  instructor: z.string().optional(),
-  color: z.string(), // hex, ex: "#2f5fe0"
+    .trim()
+    .min(3, { error: "Subject code must be at least 3 characters long" }),
+  instructor: z
+    .string()
+    .trim()
+    .min(3, { error: "Instructor name must be at least 3 characters long" })
+    .optional(),
+  color: z
+    .string(),
   status: subjectStatus.optional(),
-  progress: z.number().min(0).max(100).optional(), // 0-100
-  startDate: z.coerce.date().optional(),
-  endDate: z.coerce.date().optional(),
-  notes: z.string().optional(),
+  progress: z
+  .number({ error: "Progress must be a number" })
+  .min(0, { error: "Progress cannot be less than 0" })
+  .max(100, { error: "Progress cannot be greater than 100" })
+  .optional(),
+  startDate: z
+    .coerce.date({ error: "Start date must be a valid date" })
+    .optional(),
+  endDate: z
+    .coerce.date({ error: "End date must be a valid date" })
+    .optional(),
+  notes: z
+  .string()
+  .max(500, { error: "Notes cannot be longer than 500 characters" })
+  .optional(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
 });
 
-export async function createSubject(formData: FormData) {
-  // The owner comes from the session, so nobody can create subjects for another use
+type SubjectFormField =
+  | 'name'
+  | 'code'
+  | 'instructor'
+  | 'color'
+  | 'startDate'
+  | 'endDate';
+
+export type SubjectFormState = {
+  errors?: Partial<Record<SubjectFormField, string[]>>;
+  message?: string;
+  rawData?: Record<SubjectFormField, string>;
+}
+
+export async function createSubject(
+  prevState: SubjectFormState,
+  formData: FormData,
+) : Promise<SubjectFormState> {
   const userId = await requireUserId(); 
   
-  try {
-    const rawData = {
-      name: formData.get('name'),
-      code: formData.get('code'),
-      instructor: formData.get('instructor') || undefined,
-      color: formData.get('color'),
-      startDate: formData.get('startDate') || undefined,
-      endDate: formData.get('endDate') || undefined,
+  const rawData: Record<SubjectFormField, string> = {
+    name: String(formData.get('name') ?? ''),
+    code: String(formData.get('code') ?? ''),
+    instructor: String(formData.get('instructor') ?? ''),
+    color: String(formData.get('color') ?? ''),
+    startDate: String(formData.get('startDate') ?? ''),
+    endDate: String(formData.get('endDate') ?? ''),
+  };
+
+  const parsedData = subjectSchema.safeParse({
+    ...rawData,
+    instructor: rawData.instructor || undefined,
+    startDate: rawData.startDate || undefined,
+    endDate: rawData.endDate || undefined,
+  });
+ 
+  if (!parsedData.success) {
+    return {
+      errors: z.flattenError(parsedData.error).fieldErrors,
+      message: "Please fix the highlighted fields",
+      rawData,
     };
+  }
 
-    console.log('Raw data:', rawData);
-
-    const parsedData = subjectSchema.safeParse(rawData);
-    console.log('Parsed data:', parsedData);
-
+  try {  
     await connectToDatabase();
-    if (!parsedData.success) {
-      console.error('Validation failed:', parsedData.error);
-      return;//It failed: exit the function here.
-    }
-
     const subject = await Subject.create({
-      // No "return subject" here: returning would skip the revalidate + redirect below
       ...parsedData.data,
       userId,
     });
-    console.log('Created subject:', subject);
-    
 
   } catch (error: unknown) {
     console.error('Error creating subject:', error);
-    return;
+    return {
+      message: "Failed to create subject. Please try again.",
+      rawData,
+    }
   }
   revalidatePath('/subjects');
+  return { message: "Subject created successfully" };
 }
 
-export async function updateSubject(formData: FormData) {
+export async function updateSubject(
+  prevState: SubjectFormState,
+  formData: FormData,
+) : Promise<SubjectFormState> {
   const id = formData.get('id') as string;
   
-  try {
-    const rawData = {
-      name: formData.get('name'),
-      code: formData.get('code'),
-      instructor: formData.get('instructor') || undefined,
-      color: formData.get('color'),
-      startDate: formData.get('startDate') || undefined,
-      endDate: formData.get('endDate') || undefined,
+  const rawData: Record<SubjectFormField, string> = {
+    name: String(formData.get('name') ?? ''),
+    code: String(formData.get('code') ?? ''),
+    instructor: String(formData.get('instructor') ?? ''),
+    color: String(formData.get('color') ?? ''),
+    startDate: String(formData.get('startDate') ?? ''),
+    endDate: String(formData.get('endDate') ?? ''),
+  };
+
+  const parsedData = subjectSchema.safeParse({
+    ...rawData,
+    instructor: rawData.instructor || undefined,
+    startDate: rawData.startDate || undefined,
+    endDate: rawData.endDate || undefined,
+  });
+    
+  if (!parsedData.success) {
+    return {
+      errors: z.flattenError(parsedData.error).fieldErrors,
+      message: "Please fix the highlighted fields",
+      rawData,
     };
-
-    console.log('Raw data:', rawData);
-
-    const parsedData = subjectSchema.safeParse(rawData);
-    console.log('Parsed data:', parsedData);
-
+  }
+  try {
     await connectToDatabase();
-    if (!parsedData.success) {
-      console.error('Validation failed:', parsedData.error);
-      return;//It failed: exit the function here.
-    }
-
     const subject = await Subject.updateOne(
       { _id: id },
-      { $set: parsedData.data }
+      { $set: parsedData.data },
     );
 
-    console.log('Updated subject:', subject);
-
   } catch (error: unknown) {
-    console.error('Error updating subject:', error);
-    return;
+    console.error('Error creating subject:', error);
+    return {
+      message: "Failed to create subject. Please try again.",
+      rawData,
+    }
   }
 
   revalidatePath('/subjects');
-  revalidatePath('/subjects/[id]', 'page');  
+  revalidatePath('/subjects/[id]', 'page');
+  return { message: "Subject created successfully" };
 }
 
 export async function deleteSubject(subjectId: string): Promise<void> {

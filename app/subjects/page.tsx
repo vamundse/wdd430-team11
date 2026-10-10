@@ -24,43 +24,48 @@ export default async function SubjectsPage({ searchParams }: { searchParams: Pro
             : allSubjects.filter((subject) => subject.status === status);
 
     return (
-        <main className="flex-1 bg-slate-50 px-6 py-8 mx:px-10">
+        <div className="flex-1 bg-slate-50 px-6 py-8 mx:px-10">
             <div className="mx-auto w-full max-w-4xl">
                 <div className="flex justify-between items-center mb-4">
                     <h1 className="text-2xl font-bold">Subjects</h1>
-                    <Link href="/subjects/create">
-                        <button className="cursor-pointer text-md bg-blue-600 text-white px-5 py-2.5 rounded-lg hover:bg-blue-500">
+                    <Link href="/subjects/create" className="cursor-pointer text-md bg-blue-600 text-white px-5 py-2.5 rounded-lg hover:bg-blue-500">
                             + Add Subject
-                        </button>
                     </Link>
                 </div>
                 <div className="flex justify-between items-center mb-4">
-                    <div className="flex gap-6 text-gray-700 text-sm">
+                    <nav 
+                        aria-label="Subject status filter"
+                        className="flex gap-6 text-gray-700 text-sm"
+                    >
                         <Link
                             href="/subjects"
+                            aria-current={status === null ? "page" : undefined}
                             className={`pl-4 pr-4 pt-1 pb-1 rounded-2xl ${status === null ? 'bg-blue-600 text-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-200'}`}
                         >
                             All ({allSubjects.length})
                         </Link>
                         <Link
                             href="/subjects?status=in_progress"
+                            aria-current={status === 'in_progress' ? "page" : undefined}
                             className={`pl-4 pr-4 pt-1 pb-1 rounded-2xl ${status === 'in_progress' ? 'bg-blue-600 text-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-200'}`}
                         >
                             In Progress ({inProgressCount})
                         </Link>
                         <Link
                             href="/subjects?status=completed"
+                            aria-current={status === 'completed' ? "page" : undefined}
                             className={`pl-4 pr-4 pt-1 pb-1 rounded-2xl ${status === 'completed' ? 'bg-blue-600 text-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-200'}`}
                         >
                             Completed ({completedCount})
                         </Link>
                         <Link
                             href="/subjects?status=dropped"
+                            aria-current={status === 'dropped' ? "page" : undefined}
                             className={`pl-4 pr-4 pt-1 pb-1 rounded-2xl ${status === 'dropped' ? 'bg-blue-600 text-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-200'}`}
                         >
                             Dropped ({droppedCount})
                         </Link>
-                    </div>
+                    </nav>
                 </div>
                 {visibleSubjects.length === 0 ? (
                     <Link href="/subjects/create">
@@ -70,6 +75,6 @@ export default async function SubjectsPage({ searchParams }: { searchParams: Pro
                     <SubjectList subjects={visibleSubjects} />
                 )}
             </div>
-        </main>
+        </div>
     )
 }

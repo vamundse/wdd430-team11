@@ -14,7 +14,9 @@ export default async function Header() {
       <div className="flex items-center gap-5">
         {session?.user ? (
           <details className="relative">
-            <summary className="flex cursor-pointer items-center gap-2 rounded-full p-1 transition hover:bg-slate-100">
+            <summary
+              aria-label={`Account menu for ${displayName}`}
+              className="flex cursor-pointer items-center gap-2 rounded-full p-1 transition hover:bg-slate-100">
               <span className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 font-semibold text-blue-700">
                 {userInitial}
               </span>
@@ -23,7 +25,9 @@ export default async function Header() {
                 {displayName}
               </span>
 
-              <ChevronDown className="hidden h-4 w-4 text-slate-500 md:block" />
+              <ChevronDown
+                aria-hidden="true"
+                className="hidden h-4 w-4 text-slate-500 md:block" />
             </summary>
 
             <div className="absolute right-0 top-full z-50 mt-2 w-48 rounded-lg bg-white shadow-lg">

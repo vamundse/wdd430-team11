@@ -66,7 +66,13 @@ export default function SubjectCard({ subject, progress }: SubjectCardProps) {
                     </Link>
                     <div>
                     <div className="w-full flex items-center justify-between">
-                        <div className="h-3 bg-gray-200 rounded-full flex-1 mr-3">
+                        <div
+                            role="progressbar"
+                            aria-label={`Progress of ${subject.name}`}
+                            aria-valuemin={0}
+                            aria-valuemax={100}
+                            aria-valuenow={progress}
+                            className="h-3 bg-gray-200 rounded-full flex-1 mr-3">
                             <div
                                 className="h-3 rounded-full"
                                 style={{ width: `${progress}%`,
