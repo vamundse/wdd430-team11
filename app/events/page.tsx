@@ -16,9 +16,11 @@ export default async function EventsPage() {
 const userId = await requireUserId();
 const events = await getEventsByUserId(userId);
 
-return ( <div className="flex min-h-screen w-full flex-col bg-gray-100 px-6 py-8"> <div className="mx-auto w-full max-w-5xl"> <div className="mb-8 flex items-center justify-between"> <div> <h1 className="text-3xl font-semibold text-gray-800">
-Events </h1>
-
+return ( 
+  <div className="flex h-full w-full flex-col bg-gray-100 px-6 py-8">
+    <div className="mx-auto w-full max-w-5xl">
+      <div className="mb-8 flex items-center justify-between"> <div>
+      <h1 className="text-3xl font-semibold text-gray-800"> Events </h1>
 
         <p className="mt-2 text-gray-600">
           Keep track of your classes, exams, meetings, and deadlines.
