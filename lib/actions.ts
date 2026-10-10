@@ -298,7 +298,7 @@ export async function createSubject(
     }
   }
   revalidatePath('/subjects');
-  return { message: "Subject created successfully" };
+  redirect('/subjects');
 }
 
 export async function updateSubject(
@@ -347,7 +347,7 @@ export async function updateSubject(
 
   revalidatePath('/subjects');
   revalidatePath('/subjects/[id]', 'page');
-  return { message: "Subject created successfully" };
+  redirect('/subjects');
 }
 
 export async function deleteSubject(subjectId: string): Promise<void> {
