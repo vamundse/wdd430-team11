@@ -35,7 +35,7 @@ export default async function SubjectsPage({ searchParams }: { searchParams: Pro
                 <div className="flex justify-between items-center mb-4">
                     <nav 
                         aria-label="Subject status filter"
-                        className="flex gap-6 text-gray-700 text-sm"
+                        className="flex gap-1 text-gray-700 text-sm"
                     >
                         <Link
                             href="/subjects"
