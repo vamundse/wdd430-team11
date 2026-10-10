@@ -75,15 +75,28 @@ export default function SubjectDetails({ subject, progress }:
                     {subject.endDate && <p className="text-md">End Date: {subject.endDate.toLocaleDateString()}</p>}
                 </div>
             </div>
-            <div className="mt-2 flex items-center justify-between">
-                    <div className="h-4 bg-gray-200 rounded-full flex-1 mr-3">
-                        <div
-                            className="h-4 rounded-full"
-                            style={{ width: `${progress}%`,
-                            backgroundColor: subject.color }}
-                        ></div>
-                    </div>
-                    <span className="text-right text-md">{progress}%</span>
+            <div className="mt-2 flex items-center gap-3">
+                <div
+                    role="progressbar"
+                    aria-label={`Progress of ${subject.name}`}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-valuenow={progress}
+                    className="h-4 flex-1 rounded-full bg-gray-200"
+                >
+                    
+                <div
+                    className="h-4 rounded-full"
+                    style={{
+                        width: `${progress}%`,
+                        backgroundColor: subject.color,
+                    }}
+                />
+                </div>
+
+                <span aria-hidden="true" className="shrink-0 text-md">
+                    {progress}%
+                </span>
             </div>
         </div>
     );

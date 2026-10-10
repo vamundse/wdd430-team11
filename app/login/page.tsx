@@ -10,7 +10,7 @@ export const metadata = {
 
 export default function LoginPage() {
   return (
-    <main className="flex min-h-screen w-full items-center justify-center bg-slate-50 px-4">
+    <div className="flex min-h-screen w-full items-center justify-center bg-slate-50 px-4">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="mb-8 text-center">
@@ -47,6 +47,6 @@ export default function LoginPage() {
           </Link>
         </p>
       </div>
-    </main>
+    </div>
   );
 }

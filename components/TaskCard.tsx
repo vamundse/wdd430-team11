@@ -65,7 +65,7 @@ export default function TaskCard({
 
       <div className="min-w-0 flex-1">
         <h2
-          className={`font-semibold ${isDone ? 'text-slate-400 line-through' : 'text-slate-900'}`}
+          className={`font-semibold ${isDone ? 'text-slate-600 line-through' : 'text-slate-900'}`}
         >
           {task.title}
         </h2>

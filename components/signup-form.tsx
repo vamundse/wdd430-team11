@@ -10,11 +10,14 @@ const okClass = 'border-slate-300 focus:border-indigo-500 focus:ring-indigo-500/
 const errorClass = 'border-red-400 focus:border-red-500 focus:ring-red-500/20';
 
 function FieldError({ id, message }: { id: string; message?: string }) {
-  if (!message) return null;
   return (
-    <p id={id} className="mt-1 text-sm text-red-600">
-      {message}
-    </p>
+    <div id={id} aria-live="polite" aria-atomic="true">
+      {message && 
+        <p className="mt-1 text-sm text-red-600">
+          {message}
+        </p>
+      }
+    </div>
   );
 }
 
