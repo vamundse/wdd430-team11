@@ -11,6 +11,11 @@ export default async function Header() {
 
   return (
     <header className="flex h-20 items-center justify-end border-b border-slate-200 bg-white px-8">
+      <img 
+        src="/logo.png"
+        alt="StudyHub Logo"
+        className="h-18 w-18 mr-auto block md:hidden"
+      />
       <div className="flex items-center gap-5">
         {session?.user ? (
           <details className="relative">

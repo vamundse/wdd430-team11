@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { auth } from "@/auth";
 import { getEventsByUserId } from "@/lib/events";
+import { requireUserId } from "@/lib/session";
 import type { EventType } from "@/models/Event";
 import DeleteEventButton from "@/components/delete-event-button";
-import { Plus, CalendarDays, Pencil } from "lucide-react";
+import { Plus, Pencil } from "lucide-react";
 
 const eventTypeLabels: Record<EventType, string> = {
 class: "Class",
@@ -13,15 +13,8 @@ deadline: "Deadline",
 };
 
 export default async function EventsPage() {
-const session = await auth();
-
-if (!session?.user?.id) {
-return ( <div className="flex flex-1 items-center justify-center bg-gray-100"> <p className="text-gray-700">
-Please log in to view your events. </p> </div>
-);
-}
-
-const events = await getEventsByUserId(session.user.id);
+const userId = await requireUserId();
+const events = await getEventsByUserId(userId);
 
 return ( <div className="flex min-h-screen w-full flex-col bg-gray-100 px-6 py-8"> <div className="mx-auto w-full max-w-5xl"> <div className="mb-8 flex items-center justify-between"> <div> <h1 className="text-3xl font-semibold text-gray-800">
 Events </h1>

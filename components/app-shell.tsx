@@ -22,8 +22,8 @@ export default function AppShell({
 
   return (
     <div className="flex w-full min-h-screen">
-      <div className="flex-shrink-0 w-50 min-h-screen">{navigation}</div>
-      <div className="flex min-h-screen flex-1 flex-col">
+      <div className="w-0 md:w-50 flex-shrink-0 min-h-screen">{navigation}</div>
+      <div className="flex min-h-screen flex-1 flex-col pb-20 md:pb-0">
         {header}
         {children}
       </div>
