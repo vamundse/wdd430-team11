@@ -42,14 +42,6 @@ Events </h1>
           <Plus size={20} aria-hidden="true" />
         </Link>
 
-        <Link
-          href="/calendar"
-          aria-label="Show calendar"
-          title="Show calendar"
-          className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white p-3 text-gray-700 transition hover:bg-gray-50"
-        >
-          <CalendarDays size={20} aria-hidden="true" />
-        </Link>
       </div>
     </div>
 
